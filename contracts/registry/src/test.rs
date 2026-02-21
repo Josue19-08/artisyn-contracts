@@ -114,7 +114,7 @@ fn test_get_profile_with_different_verification_states() {
     );
 
     let profile = client.get_profile(&verified_user);
-    assert_eq!(profile.verified, true);
+    assert!(profile.verified);
 
     // Test with unverified user
     let unverified_user = Address::generate(&env);
@@ -126,7 +126,7 @@ fn test_get_profile_with_different_verification_states() {
     );
 
     let profile = client.get_profile(&unverified_user);
-    assert_eq!(profile.verified, false);
+    assert!(!profile.verified);
 }
 
 #[test]
@@ -149,14 +149,14 @@ fn test_update_verification_status() {
 
     // Verify initial state
     let profile = client.get_profile(&user);
-    assert_eq!(profile.verified, false);
+    assert!(!profile.verified);
 
     // Update verification status
     client.update_verification(&user, &true);
 
     // Verify updated state
     let profile = client.get_profile(&user);
-    assert_eq!(profile.verified, true);
+    assert!(profile.verified);
 }
 
 #[test]
@@ -247,16 +247,16 @@ fn test_multiple_users_independent_profiles() {
     // Verify each user has their own independent profile
     let profile1 = client.get_profile(&user1);
     assert_eq!(profile1.role, String::from_str(&env, "Artist"));
-    assert_eq!(profile1.verified, true);
+    assert!(profile1.verified);
     assert_eq!(profile1.badge, String::from_str(&env, "Gold"));
 
     let profile2 = client.get_profile(&user2);
     assert_eq!(profile2.role, String::from_str(&env, "Collector"));
-    assert_eq!(profile2.verified, false);
+    assert!(!profile2.verified);
     assert_eq!(profile2.badge, String::from_str(&env, "Silver"));
 
     let profile3 = client.get_profile(&user3);
     assert_eq!(profile3.role, String::from_str(&env, "Curator"));
-    assert_eq!(profile3.verified, true);
+    assert!(profile3.verified);
     assert_eq!(profile3.badge, String::from_str(&env, "Platinum"));
 }
