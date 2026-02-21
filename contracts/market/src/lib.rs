@@ -1,6 +1,5 @@
 #![no_std]
-<<<<<<< HEAD
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
+use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Address, Env};
 
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -17,10 +16,11 @@ pub enum JobStatus {
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Job {
+    pub id: u64,
     pub finder: Address,
     pub artisan: Option<Address>,
-    pub amount: i128,
     pub token: Address,
+    pub amount: i128,
     pub status: JobStatus,
     pub start_time: u64,
     pub end_time: u64,
@@ -31,39 +31,6 @@ pub struct Job {
 pub enum DataKey {
     Job(u64),
     JobCounter,
-}
-
-#[contract]
-pub struct MarketplaceContract;
-
-#[contractimpl]
-impl MarketplaceContract {
-    // Minimal implementation to ensure compilation
-    pub fn hello(env: Env) {}
-}
-=======
-use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Address, Env};
-
-#[contracttype]
-pub enum DataKey {
-    JobCounter,
-    Job(u64),
-}
-
-#[contracttype]
-#[derive(Clone, PartialEq)]
-pub enum JobStatus {
-    Open,
-}
-
-#[contracttype]
-#[derive(Clone)]
-pub struct Job {
-    pub id: u64,
-    pub finder: Address,
-    pub token: Address,
-    pub amount: i128,
-    pub status: JobStatus,
 }
 
 #[contractevent]
@@ -98,9 +65,12 @@ impl MarketContract {
         let job = Job {
             id,
             finder,
+            artisan: None,
             token,
             amount,
             status: JobStatus::Open,
+            start_time: 0, // Set to 0, will be updated when an artisan starts the job
+            end_time: 0,   // Set to 0, will be updated when the job is completed
         };
         env.storage().persistent().set(&DataKey::Job(id), &job);
 
@@ -113,4 +83,3 @@ impl MarketContract {
 }
 
 mod test;
->>>>>>> main
