@@ -188,10 +188,7 @@ impl Registry {
         write_profile(&env, &artisan, &artisan_profile);
 
         // 6. Emit UserVerified event
-        UserVerified {
-            artisan: artisan.clone(),
-        }
-        .publish(&env);
+        UserVerified { artisan }.publish(&env);
     }
 }
 
