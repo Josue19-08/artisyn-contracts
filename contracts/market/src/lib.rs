@@ -4,7 +4,7 @@ use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Ad
 // Manual interface for the Registry contract — avoids depending on the .wasm
 // artifact at compile time (which may not exist yet during development).
 mod registry {
-    use soroban_sdk::{contracttype, contractclient, Address, Env};
+    use soroban_sdk::{contractclient, contracttype, Address, Env};
 
     #[contracttype]
     #[derive(Clone)]
