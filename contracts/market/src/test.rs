@@ -403,3 +403,112 @@ fn test_start_job_already_started() {
 
     market_client.start_job(&artisan, &job_id);
 }
+
+#[test]
+fn test_cancel_job_success() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (market_id, market_client, _, _) = setup_market_and_registry(&env);
+
+    let admin = Address::generate(&env);
+    let finder = Address::generate(&env);
+    let (token_client, token_admin_client) = create_token(&env, &admin);
+
+    token_admin_client.mint(&finder, &1000);
+
+    let job_id = market_client.create_job(&finder, &token_client.address, &500);
+
+    let finder_balance_before = token_client.balance(&finder);
+    let contract_balance_before = token_client.balance(&market_id);
+
+    market_client.cancel_job(&finder, &job_id);
+
+    let finder_balance_after = token_client.balance(&finder);
+    let contract_balance_after = token_client.balance(&market_id);
+
+    assert_eq!(finder_balance_after, finder_balance_before + 500);
+    assert_eq!(contract_balance_after, contract_balance_before - 500);
+}
+
+#[test]
+#[should_panic(expected = "Job not found")]
+fn test_cancel_job_not_found() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (_, market_client, _, _) = setup_market_and_registry(&env);
+
+    let finder = Address::generate(&env);
+
+    market_client.cancel_job(&finder, &999);
+}
+
+#[test]
+#[should_panic(expected = "Not job owner")]
+fn test_cancel_job_not_owner() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let market_client = setup_market_and_registry(&env).1;
+
+    let admin = Address::generate(&env);
+    let finder = Address::generate(&env);
+    let other_user = Address::generate(&env);
+    let (token_client, token_admin_client) = create_token(&env, &admin);
+
+    token_admin_client.mint(&finder, &1000);
+
+    let job_id = market_client.create_job(&finder, &token_client.address, &500);
+
+    market_client.cancel_job(&other_user, &job_id);
+}
+
+#[test]
+#[should_panic(expected = "Job is not open")]
+fn test_cancel_job_already_assigned() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (_, market_client, registry_id, _) = setup_market_and_registry(&env);
+
+    let admin = Address::generate(&env);
+    let finder = Address::generate(&env);
+    let artisan = Address::generate(&env);
+    let (token_client, token_admin_client) = create_token(&env, &admin);
+
+    seed_artisan_profile(&env, &registry_id, &artisan, 3);
+
+    token_admin_client.mint(&finder, &1000);
+
+    let job_id = market_client.create_job(&finder, &token_client.address, &500);
+
+    market_client.assign_artisan(&finder, &job_id, &artisan);
+
+    market_client.cancel_job(&finder, &job_id);
+}
+
+#[test]
+#[should_panic(expected = "Job is not open")]
+fn test_cancel_job_already_in_progress() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let (_, market_client, registry_id, _) = setup_market_and_registry(&env);
+
+    let admin = Address::generate(&env);
+    let finder = Address::generate(&env);
+    let artisan = Address::generate(&env);
+    let (token_client, token_admin_client) = create_token(&env, &admin);
+
+    seed_artisan_profile(&env, &registry_id, &artisan, 3);
+
+    token_admin_client.mint(&finder, &1000);
+
+    let job_id = market_client.create_job(&finder, &token_client.address, &500);
+
+    market_client.assign_artisan(&finder, &job_id, &artisan);
+    market_client.start_job(&artisan, &job_id);
+
+    market_client.cancel_job(&finder, &job_id);
+}
