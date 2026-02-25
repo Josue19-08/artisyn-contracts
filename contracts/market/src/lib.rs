@@ -1,13 +1,6 @@
 #![no_std]
 use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Address, Env};
 
-// Import the registry contract client for cross-contract calls
-mod registry {
-    soroban_sdk::contractimport!(
-        file = "../../target/wasm32-unknown-unknown/release/registry.wasm"
-    );
-}
-
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum JobStatus {
@@ -143,7 +136,6 @@ impl MarketContract {
         }
 
         // 5. Cross-contract call to Registry to verify artisan role
-        let registry_client = registry::Client::new(&env, &registry_contract);
         let profile = registry_client.get_profile(&artisan);
 
         // Verify the user has the Artisan role (role = 3)
