@@ -66,6 +66,12 @@ pub struct JobAssigned {
 }
 
 #[contractevent]
+pub struct JobApplication {
+    pub id: u64,
+    pub artisan: Address,
+}
+
+#[contractevent]
 pub struct JobStarted {
     pub id: u64,
     pub artisan: Address,
@@ -155,6 +161,42 @@ impl MarketContract {
         env.storage().persistent().set(&DataKey::Job(job_id), &job);
 
         JobAssigned {
+            id: job_id,
+            artisan,
+        }
+        .publish(&env);
+    }
+
+    pub fn apply_for_job(env: Env, artisan: Address, job_id: u64) {
+        artisan.require_auth();
+
+        let registry_contract: Address = env
+            .storage()
+            .instance()
+            .get(&DataKey::RegistryContract)
+            .expect("Contract not initialized");
+
+        let job: Job = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Job(job_id))
+            .expect("Job not found");
+
+        if job.status != JobStatus::Open {
+            panic!("Job is not open");
+        }
+
+        let registry_client = registry::Client::new(&env, &registry_contract);
+        let profile = registry_client.get_profile(&artisan);
+
+        if profile.role != 3 {
+            panic!("User is not a verified Artisan");
+        }
+        if profile.is_blacklisted {
+            panic!("User is blacklisted");
+        }
+
+        JobApplication {
             id: job_id,
             artisan,
         }
