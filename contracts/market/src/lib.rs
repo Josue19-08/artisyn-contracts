@@ -15,6 +15,7 @@ mod registry {
     }
 
     #[contractclient(name = "Client")]
+    #[allow(dead_code)]
     pub trait RegistryTrait {
         fn get_profile(env: &Env, user: Address) -> Profile;
     }
