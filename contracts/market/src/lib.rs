@@ -1,6 +1,25 @@
 #![no_std]
 use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Address, Env};
 
+// Manual interface for the Registry contract — avoids depending on the .wasm
+// artifact at compile time (which may not exist yet during development).
+mod registry {
+    use soroban_sdk::{contracttype, contractclient, Address, Env};
+
+    #[contracttype]
+    #[derive(Clone)]
+    pub struct Profile {
+        pub role: u32,
+        pub metadata_hash: soroban_sdk::String,
+        pub is_verified: bool,
+    }
+
+    #[contractclient(name = "Client")]
+    pub trait RegistryTrait {
+        fn get_profile(env: &Env, user: Address) -> Profile;
+    }
+}
+
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum JobStatus {
@@ -73,7 +92,7 @@ impl MarketContract {
 
         // 2. Transfer token from finder to this contract
         let token_client = token::TokenClient::new(&env, &token);
-        token_client.transfer(&finder, env.current_contract_address(), &amount);
+        token_client.transfer(&finder, &env.current_contract_address(), &amount);
 
         // 3. Get and increment job counter
         let counter: u64 = env
@@ -92,8 +111,8 @@ impl MarketContract {
             token,
             amount,
             status: JobStatus::Open,
-            start_time: 0, // Set to 0, will be updated when an artisan starts the job
-            end_time: 0,   // Set to 0, will be updated when the job is completed
+            start_time: 0,
+            end_time: 0,
         };
         env.storage().persistent().set(&DataKey::Job(id), &job);
 
@@ -136,6 +155,7 @@ impl MarketContract {
         }
 
         // 5. Cross-contract call to Registry to verify artisan role
+        let registry_client = registry::Client::new(&env, &registry_contract);
         let profile = registry_client.get_profile(&artisan);
 
         // Verify the user has the Artisan role (role = 3)
