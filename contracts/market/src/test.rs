@@ -287,7 +287,6 @@ fn test_apply_for_job_blacklisted() {
     market_client.apply_for_job(&blacklisted_artisan, &job_id);
 }
 
-
 #[test]
 fn test_start_job_success() {
     let env = Env::default();
@@ -322,7 +321,8 @@ fn test_start_job_not_found() {
     let env = Env::default();
     env.mock_all_auths();
 
-    let (_market_id, market_client, _registry_id, _registry_client) = setup_market_and_registry(&env);
+    let (_market_id, market_client, _registry_id, _registry_client) =
+        setup_market_and_registry(&env);
     let artisan = Address::generate(&env);
 
     market_client.start_job(&artisan, &999);
