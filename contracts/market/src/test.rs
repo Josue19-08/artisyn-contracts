@@ -640,12 +640,14 @@ fn create_job_in_pending_review(
             id: job_id,
             finder: Address::generate(env),
             artisan: Some(artisan.clone()),
+            juror: None,
             token: token_address.clone(),
             amount,
             status: JobStatus::PendingReview,
             start_time: 0,
             end_time,
             deadline: 0,
+            dispute_reason: None,
         };
         env.storage().persistent().set(&DataKey::Job(job_id), &job);
         env.storage().instance().set(&DataKey::JobCounter, &job_id);
@@ -754,12 +756,14 @@ fn test_auto_release_funds_wrong_status() {
             id: job_id,
             finder: Address::generate(&env),
             artisan: Some(artisan.clone()),
+            juror: None,
             token: token_client.address.clone(),
             amount: 500,
             status: JobStatus::Completed,
             start_time: 0,
             end_time: 1000,
             deadline: 0,
+            dispute_reason: None,
         };
         env.storage().persistent().set(&DataKey::Job(job_id), &job);
     });

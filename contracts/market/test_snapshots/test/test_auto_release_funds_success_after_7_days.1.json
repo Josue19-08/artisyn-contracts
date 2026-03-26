@@ -244,6 +244,12 @@
                     },
                     {
                       "key": {
+                        "symbol": "dispute_reason"
+                      },
+                      "val": "void"
+                    },
+                    {
+                      "key": {
                         "symbol": "end_time"
                       },
                       "val": {
@@ -265,6 +271,12 @@
                       "val": {
                         "u64": "1"
                       }
+                    },
+                    {
+                      "key": {
+                        "symbol": "juror"
+                      },
+                      "val": "void"
                     },
                     {
                       "key": {

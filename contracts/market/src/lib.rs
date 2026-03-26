@@ -1,5 +1,7 @@
 #![no_std]
-use soroban_sdk::{contract, contractevent, contractimpl, contracttype, token, Address, Env};
+use soroban_sdk::{
+    contract, contractevent, contractimpl, contracttype, token, Address, Env, String,
+};
 
 mod registry {
     use soroban_sdk::{contractclient, contracttype, Address, Env, String};
@@ -38,12 +40,14 @@ pub struct Job {
     pub id: u64,
     pub finder: Address,
     pub artisan: Option<Address>,
+    pub juror: Option<Address>,
     pub token: Address,
     pub amount: i128,
     pub status: JobStatus,
     pub start_time: u64,
     pub end_time: u64,
     pub deadline: u64,
+    pub dispute_reason: Option<String>,
 }
 
 #[contracttype]
@@ -153,12 +157,14 @@ impl MarketContract {
             id,
             finder,
             artisan: None,
+            juror: None,
             token,
             amount,
             status: JobStatus::Open,
             start_time: 0,
             end_time: 0,
             deadline: 0,
+            dispute_reason: None,
         };
         env.storage().persistent().set(&DataKey::Job(id), &job);
 
